@@ -1,0 +1,30 @@
+name: Daily Update
+
+on:
+  schedule:
+    # This cron job runs at midnight UTC every day
+    - cron: '0 0 * * *'
+
+jobs:
+  update-site:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out the repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Optional: Run any updates you need (e.g., pulling data, updating files, etc.)
+      - name: Update index.html or other files
+        run: |
+          echo "Updating index.html"
+          # Example: You can replace this with your own update commands.
+          echo "<h1>Daily Updated Content</h1>" > index.html
+
+      # Commit the updated index.html and push it
+      - name: Commit and push changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: 'GitHub Actions'
+          author_email: 'actions@github.com'
+          message: 'Automated daily update of index.html'
