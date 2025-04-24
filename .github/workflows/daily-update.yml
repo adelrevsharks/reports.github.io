@@ -1,9 +1,10 @@
-name: Daily Update
+name: Daily PageSpeed Report Update
 
 on:
   schedule:
     # This cron job runs at midnight UTC every day
     - cron: '0 0 * * *'
+  workflow_dispatch:  # Allow manual triggering
 
 jobs:
   update-site:
@@ -12,19 +13,32 @@ jobs:
     steps:
       # Check out the repository
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      # Optional: Run any updates you need (e.g., pulling data, updating files, etc.)
-      - name: Update index.html or other files
+      # Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      # Install dependencies
+      - name: Install dependencies
         run: |
-          echo "Updating index.html"
-          # Example: You can replace this with your own update commands.
-          echo "<h1>Daily Updated Content</h1>" > index.html
+          python -m pip install --upgrade pip
+          pip install requests jinja2
 
-      # Commit the updated index.html and push it
+      # Fetch PageSpeed data and generate reports
+      - name: Generate PageSpeed reports
+        env:
+          PAGESPEED_API_KEY: ${{ secrets.PAGESPEED_API_KEY }}
+        run: |
+          python .github/scripts/generate_pagespeed_report.py
+
+      # Commit and push changes
       - name: Commit and push changes
         uses: EndBug/add-and-commit@v9
         with:
           author_name: 'GitHub Actions'
           author_email: 'actions@github.com'
-          message: 'Automated daily update of index.html'
+          message: 'Automated daily update of PageSpeed reports'
+          add: '*.html'
